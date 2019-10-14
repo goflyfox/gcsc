@@ -126,6 +126,7 @@ func checkVersion() {
 
 }
 
+// 缓存数据初始化
 func initConfigData() {
 	glog.Info("[ConfigClient] initConfigData start...")
 	dataPath := getDataPath()
@@ -175,7 +176,7 @@ func initConfigData() {
 		var dataList []client.ConfigBean
 		err = gconv.Struct(lines[2], dataList)
 		if err != nil {
-			glog.Error("[ConfigClient]reqUrl resp to object error:"+reqUrl, err)
+			glog.Error("[ConfigClient]reqUrl resp to object error", err)
 			continue
 		}
 
