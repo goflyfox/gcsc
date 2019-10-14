@@ -1,6 +1,7 @@
 package task
 
 import (
+	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/os/gcron"
 	"github.com/gogf/gf/os/glog"
 )
@@ -8,7 +9,8 @@ import (
 func init() {
 	glog.Info("task init...")
 
-	gcron.Add("0 * * * * *", checkVersion)
+	cronCheckVersion := g.Config().GetString("cron-check-version", "0 * * * * *")
+	gcron.Add(cronCheckVersion, checkVersion)
 
 	glog.Info("task finish")
 }
