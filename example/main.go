@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/gogf/gf/frame/g"
+	"github.com/goflyfox/gcsc/task"
 )
 
 func main() {
-	g.Server().Run()
+	task.InitConfigData()
+
 }

@@ -9,7 +9,7 @@ import (
 func init() {
 	glog.Info("task init...")
 
-	cronCheckVersion := g.Config().GetString("cron-check-version", "0 * * * * *")
+	cronCheckVersion := g.Config().GetString("config.cron-check-version", "0 * * * * *")
 	gcron.Add(cronCheckVersion, checkVersion)
 
 	glog.Info("task finish")

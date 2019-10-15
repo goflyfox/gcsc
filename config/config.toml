@@ -1,0 +1,3 @@
+[config]
+    project-secret = "12345678"
+    project-name = "test"

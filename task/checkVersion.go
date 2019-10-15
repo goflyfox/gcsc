@@ -5,6 +5,7 @@ import (
 	"github.com/goflyfox/gcsc/client"
 	"github.com/goflyfox/gcsc/utils/resp"
 	"github.com/gogf/gf/crypto/gmd5"
+	"github.com/gogf/gf/encoding/gjson"
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/net/ghttp"
 	"github.com/gogf/gf/os/gfile"
@@ -17,8 +18,8 @@ import (
 func checkVersion() {
 	// form := base.BaseForm{}
 	// config.TbConfigPublic{}.GetCacheModel(&form)
-	projectNameStr := g.Config().GetString("config-project-name")
-	projectSecretStr := g.Config().GetString("config-project-secret")
+	projectNameStr := g.Config().GetString("config.project-name")
+	projectSecretStr := g.Config().GetString("config.project-secret")
 	if projectNameStr == "" {
 		glog.Warning("[ConfigClient]updateData projects is null")
 		return
@@ -31,9 +32,9 @@ func checkVersion() {
 		return
 	}
 
-	serverUrl := g.Config().GetString("config-server-url", "http://127.0.0.1")
-	serverVersionPath := g.Config().GetString("config-version-path", "/config/api/version")
-	serverDataPath := g.Config().GetString("config-data-path", "/config/api/data")
+	serverUrl := g.Config().GetString("config.server-url", "http://127.0.0.1")
+	serverVersionPath := g.Config().GetString("config.version-path", "/config/api/version")
+	serverDataPath := g.Config().GetString("config.data-path", "/config/api/data")
 	for index, projectName := range projectNames {
 		projectSecret := projectSecrets[index]
 		nowTime := gtime.Now().Format("YmdHis")
@@ -88,6 +89,7 @@ func checkVersion() {
 			defer r.Close()
 
 			content := string(r.ReadAll())
+			glog.Info("[ConfigClient]reqUrl success", reqUrl, content)
 			var respData resp.Resp
 			err := json.Unmarshal([]byte(content), &respData)
 			if err != nil {
@@ -102,8 +104,9 @@ func checkVersion() {
 
 			dataContent := respData.GetString("content")
 			dataVersion := respData.GetString("version")
+
 			var dataList []client.ConfigBean
-			err = gconv.Struct(dataContent, dataList)
+			err = gjson.DecodeTo(dataContent, &dataList)
 			if err != nil {
 				glog.Error("[ConfigClient]reqUrl resp to object error:"+reqUrl, err)
 				continue
@@ -120,6 +123,8 @@ func checkVersion() {
 
 			// 设置缓存
 			client.SetCache(*listBean)
+
+			glog.Info("[ConfigClient]load cache and file:" + dataFilePath)
 		}
 
 	}
@@ -127,7 +132,7 @@ func checkVersion() {
 }
 
 // 缓存数据初始化
-func initConfigData() {
+func InitConfigData() {
 	glog.Info("[ConfigClient] initConfigData start...")
 	dataPath := getDataPath()
 
@@ -191,7 +196,7 @@ func initConfigData() {
 }
 
 func getDataPath() string {
-	dataPath := g.Config().GetString("config-project-secret")
+	dataPath := g.Config().GetString("config.project-secret")
 	if dataPath == "" {
 		dataPath = gfile.TempDir() + gfile.Separator + "configClient"
 	}
