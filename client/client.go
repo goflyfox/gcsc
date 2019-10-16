@@ -1,8 +1,10 @@
 package client
 
 import (
+	"github.com/goflyfox/gcsc/constant"
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/os/gcache"
+	"github.com/gogf/gf/text/gstr"
 )
 
 type ConfigBean struct {
@@ -22,8 +24,6 @@ type ConfigListBean struct {
 	Version  string       `json:"version" gconv:"version,omitempty"`
 	ListData []ConfigBean `json:"value" gconv:"value,omitempty"`
 }
-
-const CacheKey = "GCSC:CONFIG"
 
 func Value(key string) string {
 	return ValueByProject("", key)
@@ -65,6 +65,7 @@ func CodeByProject(projectName string, key string) string {
 
 func ValueByCodeProject(projectName string, code string, parentKey string) string {
 	list := GetCache(projectName).ListData
+
 	for _, bean := range list {
 		if bean.ParentKey == parentKey && bean.Code == code {
 			return bean.Value
@@ -89,10 +90,11 @@ func ListByProject(projectName string, parentKey string) []ConfigBean {
 // 获取缓存列表 缓存：projectName，ConfigListBean
 func GetCache(projectName ...string) ConfigListBean {
 	if projectName[0] == "" {
-		projectName[0] = g.Config().GetString("projectName")
+		projectNames := g.Config().GetString(constant.ParamProjectName)
+		projectName[0] = gstr.Split(projectNames, ",")[0]
 	}
 
-	cacheData := gcache.Get(CacheKey + projectName[0])
+	cacheData := gcache.Get(constant.CacheKey + projectName[0])
 	if cacheData == nil {
 		return ConfigListBean{}
 	}
@@ -102,5 +104,5 @@ func GetCache(projectName ...string) ConfigListBean {
 
 // 设置缓存列表 缓存：projectName，ConfigListBean
 func SetCache(listBean ConfigListBean) {
-	gcache.Set(CacheKey+listBean.Name, listBean, 0)
+	gcache.Set(constant.CacheKey+listBean.Name, listBean, 0)
 }

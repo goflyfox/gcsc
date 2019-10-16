@@ -3,6 +3,7 @@ package task
 import (
 	"encoding/json"
 	"github.com/goflyfox/gcsc/client"
+	"github.com/goflyfox/gcsc/constant"
 	"github.com/goflyfox/gcsc/utils/resp"
 	"github.com/gogf/gf/crypto/gmd5"
 	"github.com/gogf/gf/encoding/gjson"
@@ -12,14 +13,13 @@ import (
 	"github.com/gogf/gf/os/glog"
 	"github.com/gogf/gf/os/gtime"
 	"github.com/gogf/gf/text/gstr"
-	"github.com/gogf/gf/util/gconv"
 )
 
-func checkVersion() {
+func CheckVersion() {
 	// form := base.BaseForm{}
 	// config.TbConfigPublic{}.GetCacheModel(&form)
-	projectNameStr := g.Config().GetString("config.project-name")
-	projectSecretStr := g.Config().GetString("config.project-secret")
+	projectNameStr := g.Config().GetString(constant.ParamProjectName)
+	projectSecretStr := g.Config().GetString(constant.ParamProjectSecret)
 	if projectNameStr == "" {
 		glog.Warning("[ConfigClient]updateData projects is null")
 		return
@@ -33,8 +33,8 @@ func checkVersion() {
 	}
 
 	serverUrl := g.Config().GetString("config.server-url", "http://127.0.0.1")
-	serverVersionPath := g.Config().GetString("config.version-path", "/config/api/version")
-	serverDataPath := g.Config().GetString("config.data-path", "/config/api/data")
+	serverVersionPath := g.Config().GetString("config.url-version-path", "/config/api/version")
+	serverDataPath := g.Config().GetString("config.url-data-path", "/config/api/data")
 	for index, projectName := range projectNames {
 		projectSecret := projectSecrets[index]
 		nowTime := gtime.Now().Format("YmdHis")
@@ -133,10 +133,10 @@ func checkVersion() {
 
 // 缓存数据初始化
 func InitConfigData() {
-	glog.Info("[ConfigClient] initConfigData start...")
+	glog.Info("[ConfigClient]initConfigData start...")
 	dataPath := getDataPath()
 
-	glog.Info("[ConfigClient] dataPath:" + dataPath)
+	glog.Info("[ConfigClient]dataPath:" + dataPath)
 
 	// 获取文件列表
 	files, err := gfile.DirNames(dataPath)
@@ -147,7 +147,7 @@ func InitConfigData() {
 
 	// 如果第一次不存在，进行一次获取
 	if len(files) <= 0 {
-		checkVersion()
+		CheckVersion()
 	}
 
 	// 再次获取文件列表，不存在打印异常
@@ -163,31 +163,33 @@ func InitConfigData() {
 	}
 
 	for _, filename := range files {
-		if !gfile.IsFile(filename) {
+		filePath := dataPath + gfile.Separator + filename
+		if !gfile.IsFile(filePath) {
 			continue
 		}
 
-		content := gfile.GetContents(filename)
+		content := gfile.GetContents(filePath)
 		if content == "" {
-			glog.Error("[ConfigClient]file content empty :" + filename)
+			glog.Error("[ConfigClient]file content empty :" + filePath)
 			continue
 		}
+		glog.Info(content)
 		lines := gstr.Split(content, "\r\n")
 		if len(lines) != 3 {
-			glog.Error("[ConfigClient]file content error :" + filename)
+			glog.Error("[ConfigClient]file content error :" + filePath)
 			continue
 		}
 
 		var dataList []client.ConfigBean
-		err = gconv.Struct(lines[2], dataList)
+		err = gjson.DecodeTo(lines[2], &dataList)
 		if err != nil {
 			glog.Error("[ConfigClient]reqUrl resp to object error", err)
 			continue
 		}
 
 		listBean := new(client.ConfigListBean)
-		listBean.Version = lines[0]
-		listBean.Name = lines[1]
+		listBean.Name = lines[0]
+		listBean.Version = lines[1]
 		listBean.ListData = dataList
 		// 设置缓存
 		client.SetCache(*listBean)
@@ -195,8 +197,9 @@ func InitConfigData() {
 
 }
 
+// 获取数据目录
 func getDataPath() string {
-	dataPath := g.Config().GetString("config.project-secret")
+	dataPath := g.Config().GetString(constant.ParamDataPath)
 	if dataPath == "" {
 		dataPath = gfile.TempDir() + gfile.Separator + "configClient"
 	}

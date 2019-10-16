@@ -21,3 +21,7 @@ vendor
 
 # go
 go.sum
+
+# test file
+/test/data
+/test/data/test.txt
