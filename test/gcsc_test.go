@@ -14,22 +14,40 @@ import (
 	"time"
 )
 
+// 临时目录
 func TestTmpPath(t *testing.T) {
+	glog.Info("[Test]####TestTmpPath start...")
 	fmt.Println(gfile.TempDir() + gfile.Separator + "configClient")
 }
 
+// 测试初始化
+func TestInit(t *testing.T) {
+	glog.Info("[Test]####TestInit start...")
+	time.Sleep(time.Second * 2)
+}
+
+// 测试版本不一致重新获取
 func TestTask(t *testing.T) {
+	glog.Info("[Test]####TestTask start...")
 	cronCheckVersion := g.Config().GetString(constant.ParamCronCheckVersion, "* * * * * *")
 	gcron.Add(cronCheckVersion, task.CheckVersion)
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(3 * time.Second)
 }
 
-func TestInit(t *testing.T) {
-	time.Sleep(time.Second * 10)
+// 重新初始化
+func TestInitFunc(t *testing.T) {
+	glog.Info("[Test]####TestInitFunc start...")
+	filePath := task.GetDataPath() + "test.txt"
+	if gfile.Exists(filePath) {
+		gfile.Remove(filePath)
+	}
+	task.InitConfigData()
 }
 
+// 测试Value和Code获取接口
 func TestGet(t *testing.T) {
+	glog.Info("[Test]####TestGet start...")
 	//task.InitConfigData()
 	testValue := client.Value("test")
 	glog.Info("[Test]Value:" + testValue)
@@ -68,29 +86,43 @@ func TestGet(t *testing.T) {
 	}
 }
 
+// 测试列表获取接口
 func TestList(t *testing.T) {
-	//task.InitConfigData()
-	testValue := client.Value("test")
-	glog.Info("[Test]testValue:" + testValue)
-	if testValue != "value_test" {
-		t.Error("[Test]testValue get ne value_test")
+	glog.Info("[Test]####TestList start...")
+	testList := client.List("system")
+	glog.Info("[Test]List:", testList)
+	if len(testList) <= 0 {
+		t.Error("[Test]List lt zero")
 	}
 
-	testCode := client.Code("test")
-	glog.Info("[Test]testCode:" + testCode)
-	if testCode != "code_test" {
-		t.Error("[Test]testCode get ne code_test")
+	flag := true
+	for _, bean := range testList {
+		if bean.Key == "test" {
+			glog.Info("[Test]List test:", bean.Value)
+			flag = false
+			break
+		}
 	}
 
-	testValue = client.ValueByProject("test", "test")
-	glog.Info("[Test]testValue:" + testValue)
-	if testValue != "value_test" {
-		t.Error("[Test]testValue get ne value_test")
+	if flag {
+		t.Error("[Test]List test key is not exist")
 	}
 
-	testCode = client.CodeByProject("test", "test")
-	glog.Info("[Test]testCode:" + testCode)
-	if testCode != "code_test" {
-		t.Error("[Test]testCode get ne code_test")
+	testList = client.ListByProject("test", "system")
+	glog.Info("[Test]ListByProject:", testList)
+	if len(testList) <= 0 {
+		t.Error("[Test]ListByProject lt zero")
+	}
+
+	for _, bean := range testList {
+		if bean.Key == "test" {
+			glog.Info("[Test]List test:", bean.Value)
+			flag = false
+			break
+		}
+	}
+
+	if flag {
+		t.Error("[Test]List test key is not exist")
 	}
 }

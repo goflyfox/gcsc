@@ -118,7 +118,7 @@ func CheckVersion() {
 
 			// 存储文件
 			data := projectName + "\r\n" + dataVersion + "\r\n" + dataContent
-			dataFilePath := getDataPath() + gfile.Separator + projectName + ".txt"
+			dataFilePath := GetDataPath() + gfile.Separator + projectName + ".txt"
 			gfile.PutBytes(dataFilePath, []byte(data))
 
 			// 设置缓存
@@ -134,7 +134,7 @@ func CheckVersion() {
 // 缓存数据初始化
 func InitConfigData() {
 	glog.Info("[ConfigClient]initConfigData start...")
-	dataPath := getDataPath()
+	dataPath := GetDataPath()
 
 	glog.Info("[ConfigClient]dataPath:" + dataPath)
 
@@ -198,7 +198,7 @@ func InitConfigData() {
 }
 
 // 获取数据目录
-func getDataPath() string {
+func GetDataPath() string {
 	dataPath := g.Config().GetString(constant.ParamDataPath)
 	if dataPath == "" {
 		dataPath = gfile.TempDir() + gfile.Separator + "configClient"

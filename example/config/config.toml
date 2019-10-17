@@ -1,0 +1,6 @@
+http-port = 8081
+
+[config]
+    project-secret = "12345678"
+    project-name = "test"
+    data-path = "data"
