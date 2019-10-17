@@ -32,9 +32,9 @@ func CheckVersion() {
 		return
 	}
 
-	serverUrl := g.Config().GetString("config.server-url", "http://127.0.0.1")
-	serverVersionPath := g.Config().GetString("config.url-version-path", "/config/api/version")
-	serverDataPath := g.Config().GetString("config.url-data-path", "/config/api/data")
+	serverUrl := g.Config().GetString(constant.ParamServerUrl, "http://127.0.0.1")
+	serverVersionPath := g.Config().GetString(constant.ParamServerVersionPath, "/config/api/version")
+	serverDataPath := g.Config().GetString(constant.ParamServerDataPath, "/config/api/data")
 	for index, projectName := range projectNames {
 		projectSecret := projectSecrets[index]
 		nowTime := gtime.Now().Format("YmdHis")

@@ -1,4 +1,5 @@
 [config]
+    server-url = "http://127.0.0.1"
     project-secret = "12345678"
     project-name = "test"
     data-path = "data"
